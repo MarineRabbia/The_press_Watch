@@ -13,3 +13,4 @@ torch==1.11.0
 transformers==4.19.2
 wordcloud==1.8.1
 tensorflow==2.8.0
+fr_core_news_sm==3.3.0
