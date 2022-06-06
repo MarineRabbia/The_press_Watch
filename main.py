@@ -207,10 +207,10 @@ def a_propos():
     with col3 :
         st.subheader("Remerciements : ")
         url_wild = "https://www.linkedin.com/school/wild-code-school/mycompany/verification/"
-        #url_yassine = "https://www.linkedin.com/in/yassine-ait-baha-aab314120/"
+        #url_yassine = 
         #url_celine = 
         st.write(" ⭐ [The Wild Code School](%s)" % url_wild)
-        #st.write(" ⭐ [Yassine Ait-Baha](%s)" % url_yassine)
+        #st.write(" ⭐ [Yassine](%s)" % url_yassine)
         #st.write(" ⭐ [Céline](%s)" % url_celine)
 
     with col4:
