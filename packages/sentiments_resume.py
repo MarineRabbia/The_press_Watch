@@ -33,7 +33,7 @@ multilang_classifier = pipeline("sentiment-analysis", model="nlptown/bert-base-m
 nlp = spacy.load("fr_core_news_sm")
 
 # ajouts de stopwords a la liste existante
-stop_words = stopwords.words("french") + ['ce','cette','après','très','ça','avoir', 'près','a','comme', 'cet', 'tout', 'toute']
+stop_words = stopwords.words("french") + ['ce','cette','après','très','ça','avoir','près','a','comme','cet','tout','toute','plus','sous']
 
 # création de la liste de mots via un pattern spacy 
 matcher = Matcher(nlp.vocab)
@@ -333,7 +333,7 @@ def wordclouds_stars(df, row, keyword, keyword2):
 
 def resume(text, keyword):
     """
-    Make a resume of the text arount the chosen them/entity.
+    Make a resume of the text arount the chosen them/keyword.
 
     Tokenizing text in sentences, loop on all sentences of the text and : 
     return the sentence just before a sentence containing the keyword, the sentence containing the keyword, and the sentence just after a sentence containing the keyword.

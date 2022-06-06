@@ -131,7 +131,7 @@ def AutoScrape(link):
         
         text_complet = ' '.join(list_text_article)
         if len(text_complet) > 5000 :
-            Content = text_complet[0,5000]
+            Content = text_complet[0:5000]
         else :     
             Content = text_complet
     else : 

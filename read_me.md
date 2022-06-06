@@ -1,11 +1,11 @@
 # About the project 
 
-The Press Watch aims to follow publication of news online about a theme or an entity in particular.
+The Press Watch aims to follow publication of news online about a theme or keywords in particular.
 It can get you quick access to : 
 - medias which have published the articles
 - what is positive, what is negative in these articles
 - what is the general sentiment of this articles
-- what is said about this theme or entity in these articles
+- what is said about this theme or keywords in these articles
 
 1. Seek press articles online
 
@@ -53,10 +53,10 @@ In sentiments_resume : final_sentiment(df_test)
     output : dataframe (with a new column added, contaning final sentiment ('positif' for positive, 'negatif' for negative, 'neutre' for neutral, or 'non renseigné' is sentiment not found))
     """
 
-4. Make a resume of the article around the chosen theme/entity
+4. Make a resume of the article around the chosen theme/keywords
 In sentiment_resume : resume(text, keyword)
     """
-    Make a resume of the text arount the chosen them/entity.
+    Make a resume of the text arount the chosen them/keywords.
 
     Tokenizing text in sentences, loop on all sentences of the text and : 
     return the sentence just before a sentence containing the keyword, the sentence containing the keyword, and the sentence just after a sentence containing the keyword.
@@ -175,7 +175,7 @@ In sentiments_resume : wordcloud_article(article)
     output : plot of a wordcloud (blue)
     """
 
-- sentences that mention the chosen theme/entity
+- sentences that mention the chosen theme/keywords
 Using (4.) In sentiment_resume : resume(text, keyword)
 Displaying the text.
 

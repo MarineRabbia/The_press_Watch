@@ -76,6 +76,53 @@ def analyse_articles():
 
         neg = Image.open(r'packages/img_neg.png')
 
+        # Analyse article par article
+
+        placeholder.text(' 🦥  Affichage des analyses par article...')
+
+        st.header("Analyse article par article")
+
+        for i in range(0,len(df_final_sentiment)):
+            st.write("_____________________________________")
+
+            st.write(df_final_sentiment['title'][i])
+
+            st.write(df_final_sentiment['date'][i])
+
+            st.write(df_final_sentiment['link'][i])
+
+            if 'contenu non récupéré' in df_final_sentiment['Content'][i]:
+                st.write("Contenu de l'article non récupéré")
+                
+            else :
+                st.write("Le positif et négatif de l'article :")
+                wordclouds_stars(df_final_sentiment, i, keyword, keyword2)
+                st.pyplot(wordclouds_stars(df_final_sentiment, i, keyword, keyword2))
+                
+                st.write("Le sentiment général de l'article :")
+                if df_final_sentiment['final_sentiment_hugging'][i] == "positif":
+                    st.image(pos, caption='positif')
+
+                elif df_final_sentiment['final_sentiment_hugging'][i] == "negatif":
+                    st.image(neg, caption='negatif')
+
+                elif df_final_sentiment['final_sentiment_hugging'][i] == "neutre":
+                    st.image(neutre, caption='neutre')
+
+                st.write("Mots clés de l'article : ")
+
+                if len(df_final_sentiment['Resume'][i]) > 400 :
+                    wc_resume = wordcloud_article(df_final_sentiment['Resume'][i])
+                    st.pyplot(wc_resume)
+                else:
+                    wc_content = wordcloud_article(df_final_sentiment['Content'][i])
+                    st.pyplot(wc_content)
+
+                st.write("Résumé de l'article :")
+                st.write(df_final_sentiment['Resume'][i])
+
+        st.write("_____________________________________")
+
         # Analyse globale de l'ensemble des articles récupérés 
 
         st.header("Analyse générale")
@@ -105,7 +152,12 @@ def analyse_articles():
         fig_date = px.histogram(df_final_sentiment, x = "date", color = "final_sentiment_hugging",
                     labels = {"final_sentiment_hugging":"Sentiment"},
                     title = "Nombre d'articles par date de publication", 
-                    color_discrete_sequence = px.colors.qualitative.Safe)
+                    color_discrete_sequence = px.colors.qualitative.Safe,
+                    color_discrete_map = {
+                "positif": "rgb(204,235,197)",
+                "negatif": "rgb(251,180,174)",
+                "neutre": "rgb(254,217,166)",
+                "non renseigné": "rgb(222,203,218)"})
         fig_date.update_xaxes(title_text = "Date de publication")
         st.plotly_chart(fig_date)
 
@@ -113,80 +165,38 @@ def analyse_articles():
 
         placeholder.text(' 🦩  Création des nuages de mots...')
 
+        st.write("Les mots positifs et négatifs les plus récurrents")
         wc_global_posneg = wordcloud_global_sentiments(text_global, keyword, keyword2)
         st.pyplot(wc_global_posneg)
 
+        st.write("Les mots les plus récurrents")
         wc_global = global_wordcloud(text_global)
         st.pyplot(wc_global)
+        
+        st.write("_____________________________________")
 
-        placeholder.text(' 🦥  Affichage des analyses par article...')
-
-        # Analyse article par article
-
-        st.header("Analyse artice par article")
-
-        for i in range(0,len(df_final_sentiment)):
-
-            st.write(df_final_sentiment['title'][i])
-
-            st.write(df_final_sentiment['date'][i])
-
-            st.write(df_final_sentiment['link'][i])
-
-            if 'contenu non récupéré' in df_final_sentiment['Content'][i]:
-                st.write("Contenu de l'article non récupéré")
-                
-            else :
-                st.write("Le positif et négatif de l'article :")
-                wordclouds_stars(df_final_sentiment, i, keyword, keyword2)
-                st.pyplot(wordclouds_stars(df_final_sentiment, i, keyword, keyword2))
-
-                
-                st.write("Le sentiment général de l'article :")
-                if df_final_sentiment['final_sentiment_hugging'][i] == "positif":
-                    st.image(pos, caption='positif')
-
-                elif df_final_sentiment['final_sentiment_hugging'][i] == "negatif":
-                    st.image(neg, caption='negatif')
-
-                elif df_final_sentiment['final_sentiment_hugging'][i] == "neutre":
-                    st.image(neutre, caption='neutre')
-
-
-                st.write("Mots clés de l'article : ")
-
-                if len(df_final_sentiment['Resume'][i]) > 400 :
-                    wc_resume = wordcloud_article(df_final_sentiment['Resume'][i])
-                    st.pyplot(wc_resume)
-                else:
-                    wc_content = wordcloud_article(df_final_sentiment['Content'][i])
-                    st.pyplot(wc_content)
-
-                st.write("Résumé de l'article :")
-                st.write(df_final_sentiment['Resume'][i])
-
-            st.write("_____________________________________")
-
-        st.write(df_final_sentiment)
         placeholder.text(" 🏁  Merci pour votre patience, les résultats sont à présent complets.")
 
 def read_me():
     st.header("The press Watch")
 
-    st.markdown("**The press Watch** récupère de manière chronologique\
+    st.markdown("**The press Watch** récupère de manière chronologique (du plus récent au moins récent)\
                 les url d'articles de presse en ligne en fonction de mots clés recherchés.")
         
     st.markdown("Les sites sur lesquels sont diffusés les articles de presse contiennent de nombreuses \
-                informations, ils sont tous construits d'une manière qui leur est propre, \
+                informations, ils sont tous construits d'une manière qui leurs est propre, \
                 l'objectif de **The press Watch** est de ne récupèrer que le contenu de l'article.")
 
     st.markdown("Grâce à cela, **The press Watch** indique ensuite quels sont les éléments positifs ou négatifs\
-                de l'article, ainsi que son sentiment général. **The press Watch** vous permet d'accéder au résumé de l'article\
+                de l'article, ainsi que le sentiment général de ce dernier. **The press Watch** vous permet d'accéder au résumé de l'article\
                 sous forme de texte et de nuage de mots clés.")
 
     st.markdown("Enfin **The Press Watch** associe quelques indicateurs à votre recherche, permettant un aperçu sur les\
-                médias publiant les articles de presse recherchés, sur le rythme de publication des articles de presse recherchés\
-                et sur les tendances des sentiments dse articles de presse recherchés.")
+                médias publiant les articles de presse recherchés, sur le rythme de publication\
+                et les tendances des sentiments des articles de presse recherchés.")
+    
+    st.markdown("_**The press Watch** se veut généraliste dans cette application afin qu'il puisse être testé par tous.\
+                En le spécialisant à un thème ou des mots clés, The press Watch peut gagner en efficacité._")
 
 def a_propos():
     col1, col2 = st.columns([1, 3])
@@ -198,7 +208,7 @@ def a_propos():
         st.markdown("Data Analyst")
         url_linkedin = "https://www.linkedin.com/in/marine-rabbia/"
         st.write("Plus d'informations sur [Linkedin](%s)" % url_linkedin)
-        url_github = "https://github.com/MarineRabbia"
+        url_github = "https://github.com/MarineRabbia/The_press_Watch"
         st.write("Repository disponible sur [Github](%s)" % url_github)
 
     st.write("_____________________________________")
