@@ -23,6 +23,7 @@ import re
 import numpy as np
 import pandas as pd
 
+import fr_core_news_sm
 import torch
 
 # modele d'analyse de sentiments bert
