@@ -33,7 +33,7 @@ multilang_classifier = pipeline("sentiment-analysis", model="nlptown/bert-base-m
 nlp = spacy.load("fr_core_news_sm")
 
 # ajouts de stopwords a la liste existante
-stop_words = stopwords.words("french") + ['ce','cette','après','très','ça','avoir','près','a','comme','cet','tout','toute','plus','sous']
+stop_words = stopwords.words("french") + ['ce','cette','après','très','ça','avoir','près','a','comme','cet','tout','toute','plus','sous','leurs','leur']
 
 # création de la liste de mots via un pattern spacy 
 matcher = Matcher(nlp.vocab)
@@ -135,12 +135,12 @@ def final_sentiment(df_test):
             if (positive_length_text / full_length_text) >= 0.8:  
                 df_test['final_sentiment_hugging'][i] = 'positif'
 
-            # si un article contient au moins 20% de phrases negatives, il est negatif
+            # si un article contient au moins 30% de phrases negatives, il est negatif
             # les parties negatives peuvent occuper peu de place dans un article de presse 
             # car le ton est en general modéré, ou les parties positives et negatives s'équilibrent, 
             # mais les phrases negatives qui ont pu etre determinees comme tel par notre modele
             # sont des phrases qui ont un impact fort sur le sentiment general de l'article
-            elif (negative_length_text / full_length_text) >= 0.2:
+            elif (negative_length_text / full_length_text) >= 0.3:
                 df_test['final_sentiment_hugging'][i] = 'negatif'
             
             # si ces conditions ne sont pas remplies, on peut affiner l'analyse, et ne plus 

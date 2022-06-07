@@ -43,6 +43,9 @@ def analyse_articles():
 
     if st.button('Lancer ma recherche  🚀 '):
 
+        if len(keyword2) == 0:
+            keyword2 = keyword         
+
         df_result = url_seeker(keyword, keyword2, nombre_resultat)
 
         df_result.drop(['img','datetime','desc'], axis = 1, inplace = True)
@@ -101,13 +104,13 @@ def analyse_articles():
                 
                 st.write("Le sentiment général de l'article :")
                 if df_final_sentiment['final_sentiment_hugging'][i] == "positif":
-                    st.image(pos, caption='positif')
+                    st.image(pos, caption='positif', width = 100)
 
                 elif df_final_sentiment['final_sentiment_hugging'][i] == "negatif":
-                    st.image(neg, caption='negatif')
+                    st.image(neg, caption='negatif', width = 100)
 
                 elif df_final_sentiment['final_sentiment_hugging'][i] == "neutre":
-                    st.image(neutre, caption='neutre')
+                    st.image(neutre, caption='neutre', width = 100)
 
                 st.write("Mots clés de l'article : ")
 
@@ -184,7 +187,7 @@ def read_me():
                 les url d'articles de presse en ligne en fonction de mots clés recherchés.")
         
     st.markdown("Les sites sur lesquels sont diffusés les articles de presse contiennent de nombreuses \
-                informations, ils sont tous construits d'une manière qui leurs est propre, \
+                informations, ils sont tous construits d'une manière qui leur est propre, \
                 l'objectif de **The press Watch** est de ne récupèrer que le contenu de l'article.")
 
     st.markdown("Grâce à cela, **The press Watch** indique ensuite quels sont les éléments positifs ou négatifs\
