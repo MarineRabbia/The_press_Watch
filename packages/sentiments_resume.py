@@ -7,7 +7,7 @@ import nltk
 from nltk.tokenize import sent_tokenize, word_tokenize
 nltk.download('punkt')
 nltk.download('stopwords')
-from nltk.corpus import stopwords
+#from nltk.corpus import stopwords
 
 from transformers import pipeline
 
@@ -33,13 +33,16 @@ multilang_classifier = pipeline("sentiment-analysis", model="nlptown/bert-base-m
 nlp = spacy.load("fr_core_news_sm")
 
 # ajouts de stopwords a la liste existante
-stop_words = stopwords.words("french") + ['ce','cette','après','très','ça','avoir','près','a','comme','cet','tout','toute','plus','sous','leurs','leur']
+#stop_words = stopwords.words("french") + ['ce','cette','après','très','ça','avoir','près','a','comme','cet','tout','toute','plus','sous','leurs','leur', 'encore','tous','encore']
+
+stopwords = nlp.Defaults.stop_words
 
 # création de la liste de mots via un pattern spacy 
 matcher = Matcher(nlp.vocab)
 
 # Écris un motif pour un nom suivi d'un ou deux adjectif
-pattern = [{"POS": "NOUN"}, {"POS": "ADJ"}, {"POS": "ADJ", "OP": "?"}]
+# permet de récupérer les expressions avec préposition privative 'sans' ex : sans but lucratif
+pattern = [{"TEXT": "sans", "OP": "?"},{"POS": "NOUN"}, {"POS": "ADJ"}, {"POS": "ADJ", "OP": "?"}]
 
 # Ajoute le motif au matcher et applique le matcher au doc
 matcher.add("ADJ_NOUN_PATTERN", [pattern])
@@ -187,7 +190,7 @@ def clean(texte):
     output : string (cleaned text)
     """
     tokens = nlp(texte.lower())
-    tokens_clean = [token.text for token in tokens if (token.text not in stop_words) and (token.is_alpha)]
+    tokens_clean = [token.text for token in tokens if (token.lemma_ not in stopwords) and (token.lemma_.isalpha())]
 
     # une autre option est de ne conserver que les lemma, 
     #tokens_lemm = [token.lemma_ for token in tokens_clean]
@@ -476,8 +479,9 @@ def wordcloud_global_sentiments(text_global, keyword, keyword2):
     all_text_pos = ' '.join(list_pos)
     text_pos = clean(all_text_pos)
     text2_pos = ' '.join(text_pos)
-
-    wordcloud_global_pos = WordCloud(background_color = 'white', stopwords = [keyword,keyword2], 
+    nlp.Defaults.stop_words |= {keyword, keyword2}
+    stop_words_list = nlp.Defaults.stop_words
+    wordcloud_global_pos = WordCloud(background_color = 'white', stopwords = stop_words_list, 
                              collocations = True, width=480, height=480, max_font_size=200, min_font_size=10
                              ).generate_from_text(text2_pos)
 
@@ -486,7 +490,7 @@ def wordcloud_global_sentiments(text_global, keyword, keyword2):
     text_neg = clean(all_text_neg)
     text2_neg = ' '.join(text_neg)
 
-    wordcloud_global_neg = WordCloud(background_color = 'white', stopwords = [keyword,keyword2], 
+    wordcloud_global_neg = WordCloud(background_color = 'white', stopwords = stop_words_list, 
                              collocations = True, width=480, height=480, max_font_size=200, min_font_size=10
                              ).generate_from_text(text2_neg)
 

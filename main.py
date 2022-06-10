@@ -48,137 +48,141 @@ def analyse_articles():
 
         df_result = url_seeker(keyword, keyword2, nombre_resultat)
 
-        df_result.drop(['img','datetime','desc'], axis = 1, inplace = True)
-
-        st.write(df_result)
-
-        # fonction à mettre en place si probleme de pertinence
-        keyword_to_drop = ''
-
-        if keyword_to_drop != '':
-            df_result = pertinence_seeker(df_result, keyword_to_drop)
-
-        # mise en place d'un placeholder pour faire patienter l'utilisateur durant le chargement
-        placeholder = st.empty()
+        if len(df_result) == 0 :
+            st.write("Il n'y a pas de résultats pour ces mots clés 🦦")       
         
-        placeholder.text(" 📰  Récupération des articles en cours...")
+        else : 
+            df_result.drop(['img','datetime','desc'], axis = 1, inplace = True)
 
-        df_result['Content'] = df_result['link'].apply(AutoScrape)
+            st.write(df_result)
 
-        placeholder.text(' 🤖  Analyse en cours...')
+            # fonction à mettre en place si probleme de pertinence
+            keyword_to_drop = ''
 
-        df_result['Resume'] = df_result['Content'].apply(lambda x: resume(x, keyword))
+            if keyword_to_drop != '':
+                df_result = pertinence_seeker(df_result, keyword_to_drop)
 
-        df_analysis = sentiment_analysis(df_result)
+            # mise en place d'un placeholder pour faire patienter l'utilisateur durant le chargement
+            placeholder = st.empty()
+            
+            placeholder.text(" 📰  Récupération des articles en cours...")
 
-        df_final_sentiment = final_sentiment(df_analysis)
+            df_result['Content'] = df_result['link'].apply(AutoScrape)
 
-        pos = Image.open(r'packages/img_pos.png')
+            placeholder.text(' 🤖  Analyse en cours...')
 
-        neutre = Image.open(r'packages/img_neutre.png')
+            df_result['Resume'] = df_result['Content'].apply(lambda x: resume(x, keyword))
 
-        neg = Image.open(r'packages/img_neg.png')
+            df_analysis = sentiment_analysis(df_result)
 
-        # Analyse article par article
+            df_final_sentiment = final_sentiment(df_analysis)
 
-        placeholder.text(' 🦥  Affichage des analyses par article...')
+            pos = Image.open(r'packages/img_pos.png')
 
-        st.header("Analyse article par article")
+            neutre = Image.open(r'packages/img_neutre.png')
 
-        for i in range(0,len(df_final_sentiment)):
+            neg = Image.open(r'packages/img_neg.png')
+
+            # Analyse article par article
+
+            placeholder.text(' 🦥  Affichage des analyses par article...')
+
+            st.header("Analyse article par article")
+
+            for i in range(0,len(df_final_sentiment)):
+                st.write("_____________________________________")
+
+                st.write(df_final_sentiment['title'][i])
+
+                st.write(df_final_sentiment['date'][i])
+
+                st.write(df_final_sentiment['link'][i])
+
+                if 'contenu non récupéré' in df_final_sentiment['Content'][i]:
+                    st.write("Contenu de l'article non récupéré")
+                    
+                else :
+                    st.write("Les mots/expressions clés provenant des phrases positives (en vert) et négatives (en rouge) de l'article :")
+                    wordclouds_stars(df_final_sentiment, i, keyword, keyword2)
+                    st.pyplot(wordclouds_stars(df_final_sentiment, i, keyword, keyword2))
+                    
+                    st.write("Le sentiment général de l'article :")
+                    if df_final_sentiment['final_sentiment_hugging'][i] == "positif":
+                        st.image(pos, caption='positif', width = 100)
+
+                    elif df_final_sentiment['final_sentiment_hugging'][i] == "negatif":
+                        st.image(neg, caption='negatif', width = 100)
+
+                    elif df_final_sentiment['final_sentiment_hugging'][i] == "neutre":
+                        st.image(neutre, caption='neutre', width = 100)
+
+                    st.write("Mots clés de l'article : ")
+
+                    if len(df_final_sentiment['Resume'][i]) > 400 :
+                        wc_resume = wordcloud_article(df_final_sentiment['Resume'][i])
+                        st.pyplot(wc_resume)
+                    else:
+                        wc_content = wordcloud_article(df_final_sentiment['Content'][i])
+                        st.pyplot(wc_content)
+
+                    st.write("Résumé de l'article :")
+                    st.write(df_final_sentiment['Resume'][i])
+
             st.write("_____________________________________")
 
-            st.write(df_final_sentiment['title'][i])
+            # Analyse globale de l'ensemble des articles récupérés 
 
-            st.write(df_final_sentiment['date'][i])
+            st.header("Analyse générale")
 
-            st.write(df_final_sentiment['link'][i])
+            placeholder.text(" 📊  Préparation des visuels en cours ...")
+    
+            fig_media = px.histogram(df_final_sentiment, x = "media", 
+                        title = "Nombre d'articles par media", 
+                        color_discrete_sequence = px.colors.qualitative.Safe)
+            fig_media.update_xaxes(range=[0, 10])
+            
+            st.plotly_chart(fig_media) 
 
-            if 'contenu non récupéré' in df_final_sentiment['Content'][i]:
-                st.write("Contenu de l'article non récupéré")
-                
-            else :
-                st.write("Le positif et négatif de l'article :")
-                wordclouds_stars(df_final_sentiment, i, keyword, keyword2)
-                st.pyplot(wordclouds_stars(df_final_sentiment, i, keyword, keyword2))
-                
-                st.write("Le sentiment général de l'article :")
-                if df_final_sentiment['final_sentiment_hugging'][i] == "positif":
-                    st.image(pos, caption='positif', width = 100)
+            fig_sentiment = px.histogram(df_final_sentiment, x = "final_sentiment_hugging", 
+                            color = "final_sentiment_hugging",
+                            title = "Nombre d'articles par sentiment",
+                            color_discrete_sequence = px.colors.qualitative.Safe,
+                            labels = {"final_sentiment_hugging":"Sentiment"},
+                            color_discrete_map = {
+                    "positif": "rgb(204,235,197)",
+                    "negatif": "rgb(251,180,174)",
+                    "neutre": "rgb(254,217,166)",
+                    "non renseigné": "rgb(222,203,228)"})
+            fig_sentiment.update_xaxes(title_text = "Sentiment")
+            st.plotly_chart(fig_sentiment) 
 
-                elif df_final_sentiment['final_sentiment_hugging'][i] == "negatif":
-                    st.image(neg, caption='negatif', width = 100)
-
-                elif df_final_sentiment['final_sentiment_hugging'][i] == "neutre":
-                    st.image(neutre, caption='neutre', width = 100)
-
-                st.write("Mots clés de l'article : ")
-
-                if len(df_final_sentiment['Resume'][i]) > 400 :
-                    wc_resume = wordcloud_article(df_final_sentiment['Resume'][i])
-                    st.pyplot(wc_resume)
-                else:
-                    wc_content = wordcloud_article(df_final_sentiment['Content'][i])
-                    st.pyplot(wc_content)
-
-                st.write("Résumé de l'article :")
-                st.write(df_final_sentiment['Resume'][i])
-
-        st.write("_____________________________________")
-
-        # Analyse globale de l'ensemble des articles récupérés 
-
-        st.header("Analyse générale")
-
-        placeholder.text(" 📊  Préparation des visuels en cours ...")
-   
-        fig_media = px.histogram(df_final_sentiment, x = "media", 
-                    title = "Nombre d'articles par media", 
-                    color_discrete_sequence = px.colors.qualitative.Safe)
-        fig_media.update_xaxes(range=[0, 10])
-        
-        st.plotly_chart(fig_media) 
-
-        fig_sentiment = px.histogram(df_final_sentiment, x = "final_sentiment_hugging", 
-                        color = "final_sentiment_hugging",
-                        title = "Nombre d'articles par sentiment",
-                        color_discrete_sequence = px.colors.qualitative.Safe,
+            fig_date = px.histogram(df_final_sentiment, x = "date", color = "final_sentiment_hugging",
                         labels = {"final_sentiment_hugging":"Sentiment"},
+                        title = "Nombre d'articles par date de publication", 
+                        color_discrete_sequence = px.colors.qualitative.Safe,
                         color_discrete_map = {
-                "positif": "rgb(204,235,197)",
-                "negatif": "rgb(251,180,174)",
-                "neutre": "rgb(254,217,166)",
-                "non renseigné": "rgb(222,203,218)"})
-        fig_sentiment.update_xaxes(title_text = "Sentiment")
-        st.plotly_chart(fig_sentiment) 
+                    "positif": "rgb(204,235,197)",
+                    "negatif": "rgb(251,180,174)",
+                    "neutre": "rgb(254,217,166)",
+                    "non renseigné": "rgb(222,203,228)"})
+            fig_date.update_xaxes(title_text = "Date de publication")
+            st.plotly_chart(fig_date)
 
-        fig_date = px.histogram(df_final_sentiment, x = "date", color = "final_sentiment_hugging",
-                    labels = {"final_sentiment_hugging":"Sentiment"},
-                    title = "Nombre d'articles par date de publication", 
-                    color_discrete_sequence = px.colors.qualitative.Safe,
-                    color_discrete_map = {
-                "positif": "rgb(204,235,197)",
-                "negatif": "rgb(251,180,174)",
-                "neutre": "rgb(254,217,166)",
-                "non renseigné": "rgb(222,203,218)"})
-        fig_date.update_xaxes(title_text = "Date de publication")
-        st.plotly_chart(fig_date)
+            text_global = global_text(df_final_sentiment)
 
-        text_global = global_text(df_final_sentiment)
+            placeholder.text(' 🦩  Création des nuages de mots...')
 
-        placeholder.text(' 🦩  Création des nuages de mots...')
+            st.write("Les mots positifs et négatifs les plus récurrents dans la totalité des articles")
+            wc_global_posneg = wordcloud_global_sentiments(text_global, keyword, keyword2)
+            st.pyplot(wc_global_posneg)
 
-        st.write("Les mots positifs et négatifs les plus récurrents")
-        wc_global_posneg = wordcloud_global_sentiments(text_global, keyword, keyword2)
-        st.pyplot(wc_global_posneg)
+            st.write("Les mots les plus récurrents dans la totalité des articles")
+            wc_global = global_wordcloud(text_global)
+            st.pyplot(wc_global)
+            
+            st.write("_____________________________________")
 
-        st.write("Les mots les plus récurrents")
-        wc_global = global_wordcloud(text_global)
-        st.pyplot(wc_global)
-        
-        st.write("_____________________________________")
-
-        placeholder.text(" 🏁  Merci pour votre patience, les résultats sont à présent complets.")
+            placeholder.text(" 🏁  Merci pour votre patience, les résultats sont à présent complets.")
 
 def read_me():
     st.header("The press Watch")

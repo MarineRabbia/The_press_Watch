@@ -196,3 +196,9 @@ torch==1.11.0
 transformers==4.19.2
 wordcloud==1.8.1
 tensorflow==2.8.0
+
+# ways to improve tool
+
+- find sentiment analysis models based on newspaper article and not comments
+- scrap from bing which has less shields than google news
+- specialized this tool to one theme
